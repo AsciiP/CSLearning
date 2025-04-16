@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
-#include <stdexcept>
 
 class BigInt
 {
@@ -9,27 +8,15 @@ private:
     std::string value;
     bool isNegative;
 
-    void removeLeadingZeros()
+    // Helper function to compare two positive numbers
+    bool compareStrings(const std::string &a, const std::string &b) const
     {
-        while (value.size() > 1 && value[0] == '0')
-        {
-            value.erase(value.begin());
-        }
-        if (value == "0")
-        {
-            isNegative = false;
-        }
+        if (a.size() != b.size())
+            return a.size() < b.size();
+        return a < b;
     }
 
-    bool absLess(const BigInt &a, const BigInt &b) const
-    {
-        if (a.value.size() != b.value.size())
-        {
-            return a.value.size() < b.value.size();
-        }
-        return a.value < b.value;
-    }
-
+    // Helper function to add two positive numbers
     std::string addStrings(const std::string &a, const std::string &b) const
     {
         std::string result;
@@ -46,10 +33,12 @@ private:
             result.push_back(sum % 10 + '0');
             carry = sum / 10;
         }
+
         std::reverse(result.begin(), result.end());
         return result;
     }
 
+    // Helper function to subtract two positive numbers (a >= b)
     std::string subtractStrings(const std::string &a, const std::string &b) const
     {
         std::string result;
@@ -58,9 +47,7 @@ private:
 
         while (i >= 0)
         {
-            diff = a[i--] - '0' - borrow;
-            if (j >= 0)
-                diff -= b[j--] - '0';
+            diff = (a[i] - '0') - (j >= 0 ? (b[j--] - '0') : 0) - borrow;
             if (diff < 0)
             {
                 diff += 10;
@@ -71,124 +58,189 @@ private:
                 borrow = 0;
             }
             result.push_back(diff + '0');
+            i--;
         }
+
+        while (result.size() > 1 && result.back() == '0')
+        {
+            result.pop_back();
+        }
+
         std::reverse(result.begin(), result.end());
         return result;
     }
 
+    // Helper function to multiply two positive numbers
+    std::string multiplyStrings(const std::string &a, const std::string &b) const
+    {
+        std::string result(a.size() + b.size(), '0');
+
+        for (int i = a.size() - 1; i >= 0; --i)
+        {
+            int carry = 0;
+            for (int j = b.size() - 1; j >= 0; --j)
+            {
+                int temp = (result[i + j + 1] - '0') + (a[i] - '0') * (b[j] - '0') + carry;
+                result[i + j + 1] = temp % 10 + '0';
+                carry = temp / 10;
+            }
+            result[i] += carry;
+        }
+
+        size_t startpos = result.find_first_not_of('0');
+        if (startpos != std::string::npos)
+        {
+            return result.substr(startpos);
+        }
+        return "0";
+    }
+
+    // Helper function to divide two positive numbers
+    std::pair<std::string, std::string> divideStrings(const std::string &a, const std::string &b) const
+    {
+        if (b == "0")
+            throw std::invalid_argument("Division by zero");
+        std::string quotient, remainder = "0";
+
+        for (char digit : a)
+        {
+            remainder += digit;
+            size_t count = 0;
+            while (remainder.size() > 1 && remainder[0] == '0')
+            {
+                remainder.erase(0, 1);
+            }
+            while (!compareStrings(remainder, b)) // remainder >= b
+            {
+                remainder = subtractStrings(remainder, b);
+                count++;
+            }
+            quotient += (count + '0');
+        }
+
+        size_t startpos = quotient.find_first_not_of('0');
+        if (startpos != std::string::npos)
+        {
+            quotient = quotient.substr(startpos);
+        }
+        else
+        {
+            quotient = "0";
+        }
+
+        return {quotient, remainder};
+    }
+
+    // Helper function to compare two positive numbers
+
 public:
     BigInt() : value("0"), isNegative(false) {}
-    BigInt(const std::string &str) { *this = str; } // Use operator= to assign
-    BigInt(int num) { *this = std::to_string(num); }
-    BigInt(float num) { *this = std::to_string(int(num)); }
-    BigInt(double num) { *this = std::to_string(int(num)); }
 
-    BigInt &operator=(const std::string &str)
+    BigInt(const std::string &val)
     {
-        if (str.empty())
+        if (val.empty())
         {
             value = "0";
             isNegative = false;
         }
         else
         {
-            isNegative = (str[0] == '-');
-            value = isNegative ? str.substr(1) : str;
-            removeLeadingZeros();
+            isNegative = (val[0] == '-');
+            value = isNegative ? val.substr(1) : val;
+            if (value.empty() || value == "0")
+            {
+                value = "0";
+                isNegative = false;
+            }
+        }
+    }
+
+    BigInt(const BigInt &other) : value(other.value), isNegative(other.isNegative) {}
+
+    BigInt &operator=(const BigInt &other)
+    {
+        if (this != &other)
+        {
+            value = other.value;
+            isNegative = other.isNegative;
         }
         return *this;
     }
 
     BigInt operator+(const BigInt &other) const
     {
-        if (isNegative == other.isNegative) // Same signs
+        if (isNegative == other.isNegative)
         {
-            BigInt result;
-            result.value = addStrings(value, other.value);
-            result.isNegative = isNegative;
-            return result;
+            return BigInt((isNegative ? "-" : "") + addStrings(value, other.value));
         }
-        else // Different signs
+
+        // The sign of the result depends on the larger absolute value
+        bool resultNegative = false;
+        std::string resultValue;
+        if (compareStrings(value, other.value))
         {
-            if (absLess(*this, other))
-            {
-                BigInt result;
-                result.value = subtractStrings(other.value, value);
-                result.isNegative = other.isNegative;
-                return result;
-            }
-            else
-            {
-                BigInt result;
-                result.value = subtractStrings(value, other.value);
-                result.isNegative = isNegative;
-                return result;
-            }
+            resultValue = subtractStrings(other.value, value);
+            resultNegative = other.isNegative;
         }
+        else
+        {
+            resultValue = subtractStrings(value, other.value);
+            resultNegative = isNegative;
+        }
+
+        return BigInt((resultNegative && resultValue != "0" ? "-" : "") + resultValue);
     }
 
     BigInt operator-(const BigInt &other) const
     {
-        BigInt negOther = other;
-        negOther.isNegative = !other.isNegative;
-        return *this + negOther;
+        return *this + BigInt((other.isNegative ? "" : "-") + other.value);
     }
 
     BigInt operator*(const BigInt &other) const
     {
-        BigInt result;
-        result.value = "0";
-        result.isNegative = (isNegative != other.isNegative);
-
-        for (int i = other.value.size() - 1; i >= 0; --i)
-        {
-            std::string temp(value.size() + other.value.size(), '0');
-            int carry = 0, product = 0;
-            for (int j = value.size() - 1; j >= 0; --j)
-            {
-                product = (value[j] - '0') * (other.value[i] - '0') + carry;
-                temp[j + i + 1] = product % 10 + '0';
-                carry = product / 10;
-            }
-            temp[i] += carry;
-            result.value = addStrings(result.value, temp);
-        }
-        result.removeLeadingZeros();
-        return result;
+        return BigInt((isNegative != other.isNegative ? "-" : "") + multiplyStrings(value, other.value));
     }
 
     BigInt operator/(const BigInt &other) const
     {
-        // TODO
+        auto result = divideStrings(value, other.value);
+        return BigInt((isNegative != other.isNegative ? "-" : "") + result.first);
     }
 
-    friend std::istream &operator>>(std::istream &in, BigInt &bigInt)
+    BigInt operator%(const BigInt &other) const
+    {
+        auto result = divideStrings(value, other.value);
+        return BigInt(result.second);
+    }
+
+    friend std::ostream &operator<<(std::ostream &os, const BigInt &bigInt)
+    {
+        if (bigInt.isNegative && bigInt.value != "0")
+            os << "-";
+        os << bigInt.value;
+        return os;
+    }
+
+    friend std::istream &operator>>(std::istream &is, BigInt &bigInt)
     {
         std::string input;
-        in >> input;
-        bigInt = input;
-        return in;
-    }
-
-    friend std::ostream &operator<<(std::ostream &out, const BigInt &bigInt)
-    {
-        if (bigInt.isNegative)
-            out << '-';
-        out << bigInt.value;
-        return out;
+        is >> input;
+        bigInt = BigInt(input);
+        return is;
     }
 };
 
 int main()
 {
+    std::cout << "Enter two large integers: ";
     BigInt a, b;
-    std::cout << "Enter two big integers:" << std::endl;
     std::cin >> a >> b;
 
     std::cout << "a + b = " << a + b << std::endl;
     std::cout << "a - b = " << a - b << std::endl;
     std::cout << "a * b = " << a * b << std::endl;
     std::cout << "a / b = " << a / b << std::endl;
+    std::cout << "a % b = " << a % b << std::endl;
 
     return 0;
 }
