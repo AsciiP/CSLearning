@@ -131,8 +131,6 @@ private:
         return {quotient, remainder};
     }
 
-    // Helper function to compare two positive numbers
-
 public:
     BigInt() : value("0"), isNegative(false) {}
 
