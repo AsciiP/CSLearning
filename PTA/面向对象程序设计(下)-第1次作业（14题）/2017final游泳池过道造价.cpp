@@ -8,12 +8,12 @@
 #include <iostream>
 #define PI 3.14159
 
-class Circle
+class Cir
 {
 private:
     double radius;
 public:
-    Circle(double r):
+    Cir(double r):
         radius(r){}
     double area()
     {
@@ -39,7 +39,7 @@ int main()
 {
     double r, l, w;
     std::cin >> r >> l >> w;
-    Circle pool(r);
+    Cir pool(r);
     Rectangle land(l, w);
     double price = (land.area() - pool.area()) * 20.0;
     std::cout << price;
