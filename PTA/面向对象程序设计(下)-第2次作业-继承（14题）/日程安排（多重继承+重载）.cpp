@@ -11,7 +11,8 @@
 
 using namespace std;
 
-class Date {
+class Date
+{
 protected:
     int year;
     int month;
@@ -21,7 +22,8 @@ public:
     Date(int y = 0, int m = 0, int d = 0) : year(y), month(m), day(d) {}
 };
 
-class Time {
+class Time
+{
 protected:
     int hour;
     int minute;
@@ -31,7 +33,8 @@ public:
     Time(int h = 0, int m = 0, int s = 0) : hour(h), minute(m), second(s) {}
 };
 
-class Schedule : public Date, public Time {
+class Schedule : public Date, public Time
+{
 private:
     int ID;
 
@@ -39,36 +42,48 @@ public:
     Schedule(int id, int y, int m, int d, int h, int min, int s)
         : Date(y, m, d), Time(h, min, s), ID(id) {}
 
-    bool operator<(const Schedule &s2) const {
-        if (year != s2.year) return year < s2.year;
-        if (month != s2.month) return month < s2.month;
-        if (day != s2.day) return day < s2.day;
-        if (hour != s2.hour) return hour < s2.hour;
-        if (minute != s2.minute) return minute < s2.minute;
+    bool operator<(const Schedule &s2) const
+    {
+        if (year != s2.year)
+            return year < s2.year;
+        if (month != s2.month)
+            return month < s2.month;
+        if (day != s2.day)
+            return day < s2.day;
+        if (hour != s2.hour)
+            return hour < s2.hour;
+        if (minute != s2.minute)
+            return minute < s2.minute;
         return second < s2.second;
     }
 
-    void print() const {
+    void print() const
+    {
         cout << "The urgent schedule is No." << ID << ": "
              << year << "/" << month << "/" << day << " "
              << hour << ":" << minute << ":" << second << endl;
     }
 };
 
-int main() {
+int main()
+{
     vector<Schedule> schedules;
     int id, y, m, d, h, min, s;
     char slash, colon;
 
-    while (cin >> id && id != 0) {
+    while (cin >> id && id != 0)
+    {
         cin >> y >> slash >> m >> slash >> d >> h >> colon >> min >> colon >> s;
         schedules.emplace_back(id, y, m, d, h, min, s);
     }
 
-    if (!schedules.empty()) {
+    if (!schedules.empty())
+    {
         Schedule earliest = schedules[0];
-        for (const auto &schedule : schedules) {
-            if (schedule < earliest) {
+        for (const auto &schedule : schedules)
+        {
+            if (schedule < earliest)
+            {
                 earliest = schedule;
             }
         }
