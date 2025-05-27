@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <string>
 
 void copyTextFile(const std::string &source, const std::string &destination)
 {
@@ -28,6 +29,8 @@ void copyTextFile(const std::string &source, const std::string &destination)
 
     inFile.close();
     outFile.close();
+
+    std::cout << "File copied successfully!" << std::endl;
 }
 
 void createMultiplicationTable(const std::string &filename)
@@ -45,11 +48,15 @@ void createMultiplicationTable(const std::string &filename)
         for (int j = 1; j <= 9; ++j)
         {
             outFile << i << " * " << j << " = " << i * j << '\t';
+            std::cout << i << " * " << j << " = " << i * j << '\t';
         }
         outFile << '\n';
+        std::cout << '\n';
     }
 
     outFile.close();
+
+    std::cout << "Multiplication table created successfully!" << std::endl;
 }
 
 void modifyBmpFile(const std::string &source, const std::string &destination)
@@ -107,6 +114,8 @@ void modifyBmpFile(const std::string &source, const std::string &destination)
 
     inFile.close();
     outFile.close();
+
+    std::cout << "BMP file modified successfully!" << std::endl;
 }
 
 int main()

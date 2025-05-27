@@ -13,6 +13,7 @@ class polygon
 protected:
     int number;
     int side_length[100];
+
 public:
     polygon() : number(0)
     {
@@ -124,33 +125,39 @@ public:
     }
 };
 
-int main() {
+int main()
+{
     int n;
     cin >> n;
 
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
+    {
         int type;
         cin >> type;
 
-        if (type == 0) {
+        if (type == 0)
+        {
             polygon p;
             int sides[100];
             int count = 0;
             int len;
-            while (cin >> len && len != -1) {
+            while (cin >> len && len != -1)
+            {
                 sides[count++] = len;
             }
             p.set_sides(sides, count);
             p.display();
         }
-        else if (type == 1) {
+        else if (type == 1)
+        {
             rectangle r;
             int h, w;
             cin >> h >> w;
             r.set_dimensions(h, w);
             r.display();
         }
-        else if (type == 2) {
+        else if (type == 2)
+        {
             equal_polygon ep;
             int sides, len;
             cin >> sides >> len;
