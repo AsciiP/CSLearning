@@ -1,6 +1,7 @@
 # Compiled object files
 *.o
 *.obj
+*.class
 
 # Precompiled Headers
 *.gch
@@ -47,3 +48,4 @@ Makefile
 *.rar
 *.png
 *.docx
+*.html
