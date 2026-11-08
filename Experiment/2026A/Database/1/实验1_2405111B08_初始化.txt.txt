@@ -1,0 +1,73 @@
+-- 1. 建库部分（仅在首次创建数据库时执行）
+-- CREATE DATABASE LibraryDB;
+-- GO
+-- USE LibraryDB;
+-- GO
+
+-- 2. 清理旧数据
+DROP TABLE IF EXISTS dbo.ReadingReservation;
+DROP TABLE IF EXISTS dbo.ReadingMeeting;
+DROP TABLE IF EXISTS dbo.LibraryReader;
+
+-- 3. 建表与约束
+CREATE TABLE dbo.LibraryReader (
+    ReaderID CHAR(4) PRIMARY KEY,
+    ReaderName NVARCHAR(30),
+    ReaderGroup NVARCHAR(50),
+    ReadingInterest NVARCHAR(20)
+);
+
+CREATE TABLE dbo.ReadingMeeting (
+    MeetingID CHAR(4) PRIMARY KEY,
+    MeetingTheme NVARCHAR(60),
+    MeetingKind NVARCHAR(12),
+    MeetingRoom NVARCHAR(20),
+    SeatCount INT,
+    VacantSeats INT,
+    CONSTRAINT CK_ReadingMeeting_Seats CHECK (SeatCount > 0 AND VacantSeats >= 0 AND VacantSeats <= SeatCount)
+);
+
+CREATE TABLE dbo.ReadingReservation (
+    ReservationID CHAR(5) PRIMARY KEY,
+    ReaderID CHAR(4),
+    MeetingID CHAR(4),
+    GuestNumber INT,
+    ReserveOn DATE,
+    ReservationStatus NVARCHAR(10),
+    CONSTRAINT FK_Reservation_Reader FOREIGN KEY (ReaderID) REFERENCES dbo.LibraryReader(ReaderID),
+    CONSTRAINT FK_Reservation_Meeting FOREIGN KEY (MeetingID) REFERENCES dbo.ReadingMeeting(MeetingID),
+    CONSTRAINT CK_ReadingReservation_Data CHECK (GuestNumber > 0 AND ReservationStatus IN ('已报名', '已取消'))
+);
+
+-- 4. 插入数据
+-- 读者表（6条）
+INSERT INTO LibraryReader (ReaderID, ReaderName, ReaderGroup, ReadingInterest) VALUES
+('R001', '柳清越', '中文系', '科技'),
+('R002', '贺晨阳', '计算机学院', '文学'),
+('R003', '唐明哲', '艺术学院', '设计'),
+('R004', '林一帆', '外国语学院', '语言'),
+('R005', '赵梓涵', '经济管理学院', '管理'),
+('R006', '苏铭泽', '校友团体', '历史');
+
+-- 读书活动表（6条）
+INSERT INTO ReadingMeeting (MeetingID, MeetingTheme, MeetingKind, MeetingRoom, SeatCount, VacantSeats) VALUES
+('B001', '科学史阅读分享', '基础', '阅览室A', 14, 10),
+('B002', '科幻文学交流', '基础', '阅览室B', 16, 12),
+('B003', '非虚构写作赏析', '基础', '阅览室C', 10, 7),
+('B004', '青年作者面对面', '交流', '报告厅', 10, 8),
+('B005', '数字阅读体验', '交流', '读书角', 7, 6),
+('B006', '城市文化讲座', '拓展', '文化馆', 8, 8);
+
+-- 活动预约表（11条）
+INSERT INTO ReadingReservation (ReservationID, ReaderID, MeetingID, GuestNumber, ReserveOn, ReservationStatus) VALUES
+('Q0001', 'R001', 'B001', 1, '2026-09-01', '已报名'),
+('Q0002', 'R001', 'B002', 1, '2026-09-02', '已报名'),
+('Q0003', 'R001', 'B003', 1, '2026-09-03', '已报名'),
+('Q0004', 'R001', 'B004', 1, '2026-09-04', '已报名'),
+('Q0005', 'R002', 'B001', 2, '2026-09-05', '已报名'),
+('Q0006', 'R002', 'B002', 1, '2026-09-06', '已报名'),
+('Q0007', 'R003', 'B002', 2, '2026-09-07', '已报名'),
+('Q0008', 'R003', 'B004', 1, '2026-09-08', '已报名'),
+('Q0009', 'R004', 'B003', 2, '2026-09-09', '已报名'),
+('Q0010', 'R004', 'B005', 1, '2026-09-10', '已报名'),
+('Q0011', 'R005', 'B001', 1, '2026-09-11', '已报名');

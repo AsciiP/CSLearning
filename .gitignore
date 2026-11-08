@@ -49,3 +49,5 @@ Makefile
 *.png
 *.docx
 *.html
+
+/CourseDesign

@@ -1,0 +1,30 @@
+﻿strategy,function_or_section,original_code,modified_code,reason
+S1,closest_pair函数,"pts = sorted(set((float(x), float(y)) for x, y in points))","pts = sorted((float(x), float(y)) for x, y in points)",去掉 set() 去重：存在重复点时最近距离应为 0，直接去重会静默改变题意
+S1,strip扫描循环,while j < m and cand[j][1] - cand[i][1] < d:,"for j in range(i + 1, min(i + 8, m)):
+                if cand[j][1] - cand[i][1] >= d:
+                    break",补上“最多检查 7 个后续点”的索引上限：原写法只靠 y 差退出，当所有点 y 坐标相同时 break 永不触发，内层会扫完整条带，退化为 O(n^2)
+S1,main输入解析,if len(nums) % 2 != 0:,"for idx, pts in enumerate(test_cases, 1):",原 main() 靠读入数字个数的奇偶性来猜测 n，且残留一个从未使用的 stack 变量；改为直接使用题目给定的 3 组测试用例
+S1,输出格式,"print(f""({a[0]:.6f}, {a[1]:.6f})"")","f""点1: ({int(p1[0])}, {int(p1[1])})""","按题目要求的“最近距离: d / 点1: (x, y) / 点2: (x, y)”格式输出，并新增 order_pair 保证先输出 x 较小（x 相同则 y 较小）的点"
+S2,strip扫描break判据,if strip[b][1] - strip[a][1] >= self.best_d:,if strip[b][1] - strip[a][1] >= delta:,"把 break 判据从动态缩小的 self.best_d 改为进入合并步时冻结的 delta=min(dL,dR)，与“7 个点”定理的前提保持一致"
+S2,ClosestPairSolver._rec,strip_start = lo,（删除该行）,清理未被使用的残留变量，避免误以为 strip 会被写入 tmp 的开头部分
+S2,__main__,self_test(),"for title, pts in test_cases:",原 __main__ 跑 500 轮随机对拍与 20 万点性能演示；改为覆盖题目要求的 3 组测试用例并按指定格式输出，同时保留与暴力法的断言校验
+S3,strip扫描循环,"for j in range(i + 1, n_strip):","for j in range(i + 1, min(i + 8, n_strip)):",补上“最多检查 7 个后续点”的显式上限：原代码只有 y 差 break 而无索引上限，注释声称“内层循环次数 <= 7”但代码并未约束，与它自己第五部分的证明不符
+S3,导入语句,"import random
+import sys",import math,删除演示代码与 --n 命令行入口后不再需要 random 与 sys
+S3,__main__,"if ""--n"" in sys.argv:","for title, pts in test_cases:",原 __main__ 提供 _demo() 示例演示与 --n 压力测试入口；改为覆盖题目要求的 3 组测试用例并按指定格式输出
+S4,_merge函数,midx = xs[py[mid]] if False else None,（整个 _merge 函数删除）,AI 在回答末尾自认这是分析阶段留下的废弃桩函数，永不被调用且含 if False else None 占位代码，删除以免误导
+S4,_solve函数,band = delta * delta,（删除该行）,清理 AI 自认的过渡残留变量：band 从未参与任何判据；同时删除 strip_start = k
+S4,_solve归并初始化,"left_set_lo, left_set_hi = lo, mid
+    l, r, k = left_set_lo, left_set_hi, lo","l, r, k = lo, mid, lo",去掉无意义的中间命名 left_set_lo / left_set_hi，直接写出双指针初值
+S4,7点检查上限,"limit = i + 7
+        if limit > m - 1:
+            limit = m - 1","limit = min(i + 7, m - 1)",等价简化为单行，逻辑不变但更直观
+S4,__main__,"big = [(rng.uniform(-1e9, 1e9), rng.uniform(-1e9, 1e9)) for _ in range(200000)]","for title, pts in test_cases:",原 __main__ 为随机压力测试与 20 万点大样本；改为覆盖题目要求的 3 组测试用例并按指定格式输出，保留同 x／同 y／重复点／网格等退化断言
+S5,_solve函数签名,"def _solve(by_x: List[Point]) -> Tuple[float, Point, Point]:","def _solve(px: List[Point], py: List[Point]) -> Tuple[float, Point, Point]:",增加 py 参数，把按 y 有序的列表一路传递到每层递归，这是去掉每层重排序的前提
+S5,py线性拆分,（原本没有这一步，每层直接对 strip 重新排序）,"left_set = set(left)
+    py_left = [p for p in py if p in left_set]
+    py_right = [p for p in py if p not in left_set]",按 AI 自己文末给出的进阶提示，用 O(n) 过滤把 py 拆成左右两半；过滤保持相对顺序，两个子列表天然仍按 y 有序，这是下面能删掉 strip.sort() 的前提
+S5,strip排序,"strip.sort(key=lambda q: (q[1], q[0]))",（删除该行，strip 改为直接从已按 y 有序的 py 中过滤得到）,去掉每层递归的重新排序，把复杂度从 AI 注释中自己承认的 O(n log^2 n) 修回题目要求的 O(n log n)；同时 strip 的遍历源由 by_x 改为 py
+S5,closest函数,（原本没有重复点处理）,"if p in seen:
+            return (0.0, p, p)",本版改用 set(left) 判定 py 归属，重复点会被错误分边；提前检测重合点并返回 0，既符合题意也保证该归属判定成立
+S5,__main__,for trial in range(200):,"for title, pts in test_cases:",原 __main__ 只跑单组手工数据与 200 轮随机自检；改为覆盖题目要求的 3 组测试用例并按指定格式输出，随机自检扩到 300 轮并新增退化场景断言

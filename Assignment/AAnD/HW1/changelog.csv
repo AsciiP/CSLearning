@@ -1,0 +1,10 @@
+﻿strategy,function_or_section,original_code,modified_code,reason
+S1,stirling,if n == k or k == 1:,+ elif n == 0 or k == 0:,补充递归终止条件，避免边界输入继续递归，并处理不可能的划分情况
+S1,__main__,,"if __name__ == ""__main__"": test_cases = ...",验证递推实现能够正确计算题目要求的典型输入
+S2,stirling_second/stirling_second_memo/stirling_second_dp,function stirling_second()/stirling_second_memo()/stirling_second_dp(),stirling_second,根据作业要求采用结构更简单的递归版本，减少不必要的实现和接口
+S2,__main__,# 验证几个具体值 ...,"if __name__ == ""__main__"": test_cases = ...",覆盖题目要求的典型输入，验证递推计算结果
+S3,stirling,dp[][],"dp[]",在保持 O(nk) 时间复杂度的同时将空间复杂度从 O(nk) 降为 O(k)，并使非负整数边界定义一致
+S4,__main__,"print(S(30, 15)); print(S.row(10))","if __name__ == ""__main__"": test_cases = ...",覆盖题目要求的典型输入，验证递推计算结果
+S4,row,对角线结果固定为 1,_reduce(1),"修正 mod=1 时 S(n,n) 应为 0 而不是 1 的取模边界问题"
+S4,Stirling2.__init__,mod: int = None,mod: Optional[int] = None,使类型标注准确表达 mod 可以省略，消除静态类型检查错误
+S5,__main__,"典型输入测试分散且缺少 (3,2) 和 (10,4)","if __name__ == ""__main__"": test_cases = ...",覆盖题目要求的典型输入，集中验证递推计算结果
